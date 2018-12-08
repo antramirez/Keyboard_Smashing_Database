@@ -84,8 +84,7 @@ function refreshResults() {
 
   // open GET request and add event listener for when request loads
   req.open('GET', url);
-  req.addEventListener('load', function(evt) {
-    console.log(req.status, req.responseText);
+  req.addEventListener('load', function() {
     // if smashings are found, parse JSON and
     // call insertSmashing on every smashing
     if (req.status >= 200 && req.status < 300) {
@@ -114,9 +113,8 @@ function postSmashing() {
   req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 
   // add event listener on load so the smashings refresh
-  req.addEventListener('load', function(evt) {
-    // log status and response text, and refresh the smashings on the page
-    console.log(req.status, req.responseText);
+  req.addEventListener('load', function() {
+    // refresh the smashings on the page
     refreshResults();
   });
 
