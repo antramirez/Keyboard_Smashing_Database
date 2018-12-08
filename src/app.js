@@ -38,14 +38,14 @@ function countLetters(smashingText) {
 //
 // if there is a query string, filter the results using that query string
 //
-// example: 
-// GET /api/smashings?lengthGt=2&lengthLt=55555 
+// example:
+// GET /api/smashings?lengthGt=2&lengthLt=55555
 //
 // (note that smashings is plural, not singular!)
 //
 // results in the following json response:
 // [
-//   {smashingText: 'aaa', length: 3, etc.}, 
+//   {smashingText: 'aaa', length: 3, etc.},
 //   {smashingText: 'asdf', length: 4, etc.}
 // ]
 app.get("/api/smashings", (req, res) => {
@@ -69,14 +69,17 @@ app.get("/api/smashings", (req, res) => {
   const q = Object.keys(req.query).length > 0 ? { $and: Object.entries(req.query)
       .map(([field, val]) => filterFields[field](val)) } : {};
 
-  // TODO: 
+  // TODO:
   // find documents and send back a response
   //
   // * use the query object, q, above to search for matching documents in the
   //   smashings collection
   // * give back the result as json... it should be an Array of smashing
-  //   objects: [{smashingText: 'aaa', length: 3, etc.}, etc.] (which is 
+  //   objects: [{smashingText: 'aaa', length: 3, etc.}, etc.] (which is
   //   essentially what the result set will be when the query finishes)
+  Smashing.find(q).exec((err, result, count) => {
+    res.json(result);
+  })
 });
 
 // POST /api/smashings
@@ -84,7 +87,7 @@ app.get("/api/smashings", (req, res) => {
 // (note, singular, not plural!)
 //
 // creates a new keyboard smashing document in the database by using
-// the post body (whose content type is the same as if it were 
+// the post body (whose content type is the same as if it were
 // submitted through a form: application/x-www-form-urlencoded)
 //
 // * this only expects a single value, the string entered in the form's
@@ -94,14 +97,14 @@ app.get("/api/smashings", (req, res) => {
 // * it should return a response in json , with {_code: 'OK'} if document
 //   is successfully saved
 //
-// example: 
+// example:
 // POST /api/smashing  with body smashingText='asdf'
 //
 // results in the following json response:
 // {"_code": "OK"} or {"_code": "ERROR"} depending on if document was
 // successfully saved
 app.post("/api/smashing", (req, res) => {
-  // TODO: 
+  // TODO:
   // use the parses incoming POST request body (this should be done by
   // the middleware) to create a new document and save it to the database:
   //
@@ -111,11 +114,11 @@ app.post("/api/smashing", (req, res) => {
   // * use the nowAsString function defined at the beginning of this file
   //   to set the date of the submission in YYYY-MM-DD format
   // * use the countLetters function defined at the beginning of this file
-  //   to set the letterCounts property, which should be an array of 
+  //   to set the letterCounts property, which should be an array of
   //   objects that look similar to this:{letter: "h", count: 8}
   //   (simply use the return result from the function as is)
   // * generate a random floating point number between 0 and 1 to
-  //   assign to the sentiment property 
+  //   assign to the sentiment property
   // * make sure you send a response as soon as the data is saved
   //   ... the response should be {_code: "OK"} if the document is saved
   //   ... or {_code: "ERROR"} if an error occurred while saving
