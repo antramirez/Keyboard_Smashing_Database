@@ -46,7 +46,7 @@ function deleteAllResults() {
   const resultsDiv = document.querySelector('#results');
   const results = document.querySelectorAll('.smashingResult');
   // loop through every result and remove them from the results div
-  for (var i = 0; i < results.length; i++) {
+  for (let i = 0; i < results.length; i++) {
     resultsDiv.removeChild(results[i]);
   }
 }
@@ -63,7 +63,7 @@ function refreshResults() {
   const req = new XMLHttpRequest();
   let url = 'api/smashings';
 
-  // get all input fields
+  // get all input elements
   const fields = document.querySelectorAll('#filtering input');
 
   // get text fields that were actually filled in and not the submit button
@@ -75,23 +75,12 @@ function refreshResults() {
     url += '?';
 
     // construct array of parameters out of each text field name and value
-    const params = filledIn.map((i) =>
-  i.name + '=' + i.value);
-
-    // add parameters and delimiters for each text field filled in
-    // Array.prototype.forEach.call(filledIn, function(i, count) {
-    //   url += i.name + '=' + i.value;
-    //   // only add '&' if there are more parameters
-    //   if (count < filledIn.length - 1) {
-    //     url += '&';
-    //   }
-    // });
+    const params = filledIn.map((i) => i.name + '=' + i.value);
 
     // join each parameter with '&' and add to url
-    url+=params.join('&');
+    url += params.join('&');
     console.log(url);
   }
-
 
   // open GET request and add event listener for when request loads
   req.open('GET', url);
@@ -105,9 +94,6 @@ function refreshResults() {
         insertSmashing(s);
       }
     }
-    else {
-      console.log('no smashings');
-    }
   });
 
   // send request
@@ -115,28 +101,50 @@ function refreshResults() {
 }
 
 function postSmashing() {
-  // TODO:
-  // save the string entered into the textarea form input by making a POST
-  // request to the appropriate API end point
-  //
-  // * retrieve the value of the textarea
-  // * use a POST request to the api url, /api/smashing:
-  //   * its body should contain the smashing data typed in by the user
-  //   * the ContentType should be application/x-www-form-urlencoded
-  // * it should update the page with the newly saved data ONLY AFTER A
-  //   RESPONSE is received (note that one of the functions that you
-  //   implemented may help with this part)
+  // get text field for smashing
+  const smashingText = document.querySelector('#userInput textarea');
+
+  // create new XMLHttpRequest to post
+  // smashing objects from our api
+  const req = new XMLHttpRequest();
+  const url = 'api/smashing';
+
+  // open POST and set header
+  req.open('POST', url);
+  req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+
+  // add event listener on load so the smashings refresh
+  req.addEventListener('load', function(evt) {
+    // log status and response text, and refresh the smashings on the page
+    console.log(req.status, req.responseText);
+    refreshResults();
+  });
+
+  // create the body of request
+  req.send('smashingText=' + smashingText.value);
+
+  // empty text area so it looks like a page refresh
+  smashingText.value = '';
 }
 
 function main() {
   // show all smashings when the page loads
   refreshResults();
+
   // add event listener to filter smashings button
-  const btn = document.querySelector('input[value="filter viewed data"]');
-  btn.addEventListener('click', function(evt) {
+  const filterBtn = document.querySelector('input[value="filter viewed data"]');
+  filterBtn.addEventListener('click', function(evt) {
     // prevent page from reloading and retrieve results
     evt.preventDefault();
     refreshResults();
+  });
+
+  // add event listener to post smashing button
+  const sendBtn = document.querySelector('input[value="send user data"]');
+  sendBtn.addEventListener('click', function(evt) {
+    // prevent page from reloading and post smashing
+    evt.preventDefault();
+    postSmashing();
   });
 }
 
