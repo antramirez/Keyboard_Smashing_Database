@@ -55,25 +55,6 @@ function deleteAllResults() {
 // retrieving data from the server (via the api endpoints) with the
 // appropriate query string parameters as specified by form inputs
 function refreshResults() {
-  // TODO:
-  // retrieve filtered smashing data from the api and display results
-  //
-  // * get rid of the existing results (if there are any) on the page so
-  //   that we can show the new updated results (there's a helper function
-  //   declared above that can be called to do this... as long as you've
-  //   already implemented it)
-  // * construct a query string by pulling values from every form field in
-  //   this filter form (you can get every form field individually or use
-  //   some combination of higher order functions over all of the inputs)
-  // * make a GET request to /api/smashings with the query string attached
-  // * parse the resulting response
-  // * go over every smashing in the result and add it to the dom (there's
-  //   a helper function above that will do this for you if you finish the
-  //   implementation)
-
-  // no form data to send via post
-  // evt.preventDefault();
-
   // delete all present smashings to make room for updated ones
   deleteAllResults();
 
@@ -81,7 +62,36 @@ function refreshResults() {
   // smashing objects from our api
   const req = new XMLHttpRequest();
   let url = 'api/smashings';
-  // TODO: filter
+
+  // get all input fields
+  const fields = document.querySelectorAll('#filtering input');
+
+  // get text fields that were actually filled in and not the submit button
+  const filledIn = Array.prototype.filter.call(fields, (f) => f.value !== '' && f.value !== 'filter viewed data');
+
+  // if at least one field was filled in, add to query string
+  if (filledIn.length > 0) {
+    // begin query string
+    url += '?';
+
+    // construct array of parameters out of each text field name and value
+    const params = filledIn.map((i) =>
+  i.name + '=' + i.value);
+
+    // add parameters and delimiters for each text field filled in
+    // Array.prototype.forEach.call(filledIn, function(i, count) {
+    //   url += i.name + '=' + i.value;
+    //   // only add '&' if there are more parameters
+    //   if (count < filledIn.length - 1) {
+    //     url += '&';
+    //   }
+    // });
+
+    // join each parameter with '&' and add to url
+    url+=params.join('&');
+    console.log(url);
+  }
+
 
   // open GET request and add event listener for when request loads
   req.open('GET', url);
@@ -121,9 +131,13 @@ function postSmashing() {
 function main() {
   // show all smashings when the page loads
   refreshResults();
-  // add event listener to the send user data submit button
-  const btn = document.querySelector('input[value="send user data"]');
-  btn.addEventListener('click', refreshResults);
+  // add event listener to filter smashings button
+  const btn = document.querySelector('input[value="filter viewed data"]');
+  btn.addEventListener('click', function(evt) {
+    // prevent page from reloading and retrieve results
+    evt.preventDefault();
+    refreshResults();
+  });
 }
 
 document.addEventListener("DOMContentLoaded", main);
