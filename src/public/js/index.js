@@ -46,8 +46,8 @@ function deleteAllResults() {
   const resultsDiv = document.querySelector('#results');
   const results = document.querySelectorAll('.smashingResult');
   // loop through every result and remove them from the results div
-  for (let i = 0; i < results.length; i++) {
-    resultsDiv.removeChild(results[i]);
+  for (const r of results) {
+    resultsDiv.removeChild(r);
   }
 }
 
