@@ -1,43 +1,27 @@
 // insert a single instance / keyboard smashing object into the DOM as
 // a div with a single paragraph for each field, smashingText, length,
-// and sentiment:
-// <div class="smashingResult">
-//   <p>smashingText: aabbcc</p>
-//   <p>length: 6</p>
-//   <p>sentiment: 0.2245156334138958</p>
-//   <p>date: 2018-12-04</p>
-// </div>
-// the parameter, smashing, represents a single keyboard smashing
-// object (so it contains smashingText, length, etc.):
-// {smashintText: 'aabb', length: 4}
+// and sentiment
 function insertSmashing(smashing) {
   // new div to drop the data into
   const newDiv = document.createElement("div");
   newDiv.classList.add("smashingResult");
 
-  // get results div
+  // get results div that the new div will be placed into
   const resultsDiv = document.querySelector('#results');
 
-  // new paragraphs for each corresponding smashing text field
-  const textP = document.createElement('p');
-  const lengthP = document.createElement('p');
-  const sentimentP = document.createElement('p');
-  const dateP = document.createElement('p');
-
-  // append paragraphs to new result div
-  newDiv.appendChild(textP);
-  newDiv.appendChild(lengthP);
-  newDiv.appendChild(sentimentP);
-  newDiv.appendChild(dateP);
+  // array of fields
+  const fields = ['smashingText', 'length', 'sentiment', 'date'];
+  // create a new p element for every field
+  for (const field of fields) {
+    const p = document.createElement('p');
+    // set corresponding text content
+    p.textContent = field + ': ' + smashing[field];
+    // append p to the new smashing div
+    newDiv.appendChild(p);
+  }
 
   // append new div to results div
   resultsDiv.appendChild(newDiv);
-
-  // set corresponding text content
-  textP.textContent = 'SMASHING TEXT: ' + smashing.smashingText;
-  lengthP.textContent = 'LENGTH: ' + smashing.length;
-  sentimentP.textContent = 'SENTIMENT: ' + smashing.sentiment;
-  dateP.textContent = 'DATE: ' + smashing.date;
 }
 
 // remove every DOM element that contains a smashing
@@ -66,20 +50,19 @@ function refreshResults() {
   // get all input elements
   const fields = document.querySelectorAll('#filtering input');
 
-  // get text fields that were actually filled in and not the submit button
-  const filledIn = Array.prototype.filter.call(fields, (f) => f.value !== '' && f.value !== 'filter viewed data');
+  // use Array.prototype's filter function on the list of
+  // input elements to filter input fields to create an array
+  // of field strings that are not blank nor the submit button,
+  // map each filtered field to a string representing a query
+  // string parameter with the field's name and value, and
+  // join the array's elements with '&' to create a query string
+  const q = Array.prototype.filter.call(fields, (f) => f.value !== '' && f.value !== 'filter viewed data')
+    .map((f) => f.name + '=' + f.value)
+    .join('&');
 
-  // if at least one field was filled in, add to query string
-  if (filledIn.length > 0) {
-    // begin query string
-    url += '?';
-
-    // construct array of parameters out of each text field name and value
-    const params = filledIn.map((i) => i.name + '=' + i.value);
-
-    // join each parameter with '&' and add to url
-    url += params.join('&');
-    console.log(url);
+  // if there is a query string, add it to the url
+  if (q.length > 0) {
+    url += '?' + q;
   }
 
   // open GET request and add event listener for when request loads
@@ -114,8 +97,10 @@ function postSmashing() {
 
   // add event listener on load so the smashings refresh
   req.addEventListener('load', function() {
-    // refresh the smashings on the page
-    refreshResults();
+    // refresh the smashings on the page if no errors occur
+    if (req.responseText._code !== 'ERROR') {
+      refreshResults();
+    }
   });
 
   // create the body of request

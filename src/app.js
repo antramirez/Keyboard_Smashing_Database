@@ -37,17 +37,6 @@ function countLetters(smashingText) {
 // * date
 //
 // if there is a query string, filter the results using that query string
-//
-// example:
-// GET /api/smashings?lengthGt=2&lengthLt=55555
-//
-// (note that smashings is plural, not singular!)
-//
-// results in the following json response:
-// [
-//   {smashingText: 'aaa', length: 3, etc.},
-//   {smashingText: 'asdf', length: 4, etc.}
-// ]
 app.get("/api/smashings", (req, res) => {
   // parse the incoming query parameters to make the filtering form
   // on the frontend part functional
@@ -69,34 +58,17 @@ app.get("/api/smashings", (req, res) => {
   const q = Object.keys(req.query).length > 0 ? { $and: Object.entries(req.query)
       .map(([field, val]) => filterFields[field](val)) } : {};
 
-  // send back array of smashings as json
-  // if none, empty array is sent
-  Smashing.find(q).exec((err, result, count) => {
-    res.json(result);
-  })
+  // send back array of smashings as json if no error
+  Smashing.find(q, (err, result) => {
+    if (!err) {
+      res.json(result);
+    }
+  });
 });
 
-// POST /api/smashings
-//
-// (note, singular, not plural!)
-//
 // creates a new keyboard smashing document in the database by using
 // the post body (whose content type is the same as if it were
 // submitted through a form: application/x-www-form-urlencoded)
-//
-// * this only expects a single value, the string entered in the form's
-// textarea
-// * all of the other fields will be calculated based on that single
-//   value
-// * it should return a response in json , with {_code: 'OK'} if document
-//   is successfully saved
-//
-// example:
-// POST /api/smashing  with body smashingText='asdf'
-//
-// results in the following json response:
-// {"_code": "OK"} or {"_code": "ERROR"} depending on if document was
-// successfully saved
 app.post("/api/smashing", (req, res) => {
   // create a new smashing out of smashing text and helper functions
   const smashing = new Smashing({
@@ -107,7 +79,7 @@ app.post("/api/smashing", (req, res) => {
     date: nowAsString()
   });
   // send appropriate codes when trying to save
-  smashing.save((err, result, count) => {
+  smashing.save((err) => {
     if (err) {
       res.json({_code: "ERROR"});
     }
